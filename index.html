@@ -171,8 +171,8 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
       </div>
 
       <section class="card" aria-labelledby="h-sueldo">
-        <h2 id="h-sueldo">Adónde va vuestro sueldo bruto</h2>
-        <div class="bar" id="barSal" role="img" aria-label="Reparto del sueldo bruto"></div>
+        <h2 id="h-sueldo">Vuestro neto de cada mes</h2>
+        <div class="bar" id="barSal" role="img" aria-label="Reparto del sueldo neto mensual"></div>
         <div class="legend" id="legSal"></div>
       </section>
 
@@ -226,7 +226,7 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
   const $ = id => document.getElementById(id);
   const eur = new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0});
   const E = v => eur.format(Math.round(v));
-  const K = v => Math.abs(v)>=1000 ? (Math.round(v/1000)).toLocaleString("es-ES")+" k€" : E(v);
+  const K = v => Math.abs(v)>=10000 ? (Math.round(v/1000)).toLocaleString("es-ES")+" k€" : E(v);
 
   // ---------- Impuestos sobre el sueldo (Cataluña 2026) ----------
   const STATE = [[12450,.095],[20200,.12],[35200,.15],[60000,.185],[300000,.225],[Infinity,.245]];
@@ -337,7 +337,7 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
     $("tSave").textContent = E(save); $("tSaveS").textContent = E(save*12)+" al año";
     $("pctHint").textContent = inp.pct<0.2 ? "Lo recomendado es ahorrar al menos un 20%." : inp.pct<=0.35 ? "Buen ritmo para comprar en unos años." : "Muy ambicioso: dejad margen para vivir.";
 
-    bar("barSal","legSal",[["Impuestos y Seg. Social",tax,"var(--tax)"],["Para vivir",net*(1-inp.pct),"var(--accent2)"],["Ahorro",net*inp.pct,"var(--accent)"]]);
+    bar("barSal","legSal",[["Para vosotros",netM*(1-inp.pct),"var(--accent2)"],["Ahorro para la casa",netM*inp.pct,"var(--accent)"]]);
 
     const sc = scenario(inp, inp.yrs);
     $("tFut").textContent = E(sc.S);
