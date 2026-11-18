@@ -46,7 +46,12 @@ h2{font-family:var(--display); font-weight:800; font-size:20px; margin:0; text-w
 .money .lbl{display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; color:var(--muted)}
 .money input{font-family:var(--display); font-weight:800; font-size:26px; color:var(--ink); background:var(--bg); border:1px solid transparent; border-radius:12px; padding:8px 12px; width:100%; font-variant-numeric:tabular-nums}
 .money input:disabled{opacity:.35}
+.pair{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+.pair label{display:flex; flex-direction:column; gap:2px; font-size:11.5px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+.pair label:last-child input{color:var(--accent)}
+.pair input{font-size:22px}
 .age{display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:600; color:var(--muted)}
+.age select{font:inherit; font-weight:700; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:2px 4px}
 .age input{width:54px; font:inherit; font-weight:700; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:3px 6px; text-align:center}
 .toggle{display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:12.5px; font-weight:700; color:var(--accent)}
 .toggle input{accent-color:var(--accent); width:16px; height:16px}
@@ -105,7 +110,7 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
 <div class="wrap">
   <header>
     <h1>Sueldo, ahorro y casa</h1>
-    <p class="lead">Pon vuestros sueldos brutos, cuánto ahorráis y durante cuántos años. Ya se tienen en cuenta los impuestos, la hipoteca y los gastos de compra.</p>
+    <p class="lead">Pon vuestro sueldo de cada mes (bruto o neto, el otro se calcula solo), cuánto ahorráis y durante cuántos años. Ya se tienen en cuenta los impuestos, la hipoteca y los gastos de compra.</p>
   </header>
 
   <div class="layout">
@@ -114,13 +119,15 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
       <h2 id="h-datos">Vuestros datos</h2>
 
       <div class="money">
-        <div class="lbl"><label for="g1">Tu sueldo bruto al año</label><span class="age"><label for="a1">Edad</label><input id="a1" type="number" min="16" max="80" value="22"></span></div>
-        <input id="g1" type="number" inputmode="numeric" min="0" step="500" value="37000">
+        <div class="lbl"><span>Tu sueldo al mes</span><span class="age"><label for="a1">Edad</label><input id="a1" type="number" min="16" max="80" value="22"></span></div>
+        <div class="pair"><label for="g1">Bruto<input id="g1" type="number" inputmode="numeric" min="0" step="50" value="2650"></label><label for="n1">Neto<input id="n1" type="number" inputmode="numeric" min="0" step="50"></label></div>
+        <span class="age"><label for="pg1">Pagas</label><select id="pg1"><option value="14" selected>14</option><option value="12">12</option></select><span id="y1"></span></span>
       </div>
 
       <div class="money">
-        <div class="lbl"><label class="toggle" for="on2"><input id="on2" type="checkbox" checked> Sueldo de tu pareja</label><span class="age"><label for="a2">Edad</label><input id="a2" type="number" min="16" max="80" value="23"></span></div>
-        <input id="g2" type="number" inputmode="numeric" min="0" step="500" value="30000" aria-label="Sueldo bruto de tu pareja al año">
+        <div class="lbl"><label class="toggle" for="on2"><input id="on2" type="checkbox" checked> Sueldo de tu pareja al mes</label><span class="age"><label for="a2">Edad</label><input id="a2" type="number" min="16" max="80" value="23"></span></div>
+        <div class="pair"><label for="g2">Bruto<input id="g2" type="number" inputmode="numeric" min="0" step="50" value="2500"></label><label for="n2">Neto<input id="n2" type="number" inputmode="numeric" min="0" step="50"></label></div>
+        <span class="age"><label for="pg2">Pagas</label><select id="pg2"><option value="14">14</option><option value="12" selected>12</option></select><span id="y2"></span></span>
       </div>
 
       <div class="sl">
@@ -142,8 +149,6 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
       <details>
         <summary>Ajustes avanzados (ya tienen valores razonables)</summary>
         <div class="adv">
-          <label for="pg1">Tus pagas<select id="pg1"><option value="14" selected>14</option><option value="12">12</option></select></label>
-          <label for="pg2">Pagas pareja<select id="pg2"><option value="14">14</option><option value="12" selected>12</option></select></label>
           <label for="tin">Interés hipoteca (%)<input id="tin" type="number" min="0" max="10" step="0.05" value="3"></label>
           <label for="term">Años de hipoteca<select id="term"><option>20</option><option>25</option><option selected>30</option><option>35</option></select></label>
           <label for="ltv">Banco financia<select id="ltv"><option value="0.8" selected>80%</option><option value="0.9">90%</option><option value="0.95">95% (aval ICO)</option></select></label>
@@ -252,7 +257,7 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
   const ids = ["g1","a1","on2","g2","a2","pct","yrs","s0","pg1","pg2","tin","term","ltv","dti","ret","raise","eurm2","kind","cushion","m2"];
   function read(){
     const n = id => parseFloat($(id).value)||0;
-    return { g1:n("g1"), a1:n("a1"), on2:$("on2").checked, g2:n("g2"), a2:n("a2"),
+    return { g1:n("g1")*n("pg1"), a1:n("a1"), on2:$("on2").checked, g2:n("g2")*n("pg2"), a2:n("a2"),
       pct:n("pct")/100, yrs:Math.round(n("yrs")), s0:n("s0"), pg1:n("pg1"), pg2:n("pg2"),
       tin:n("tin"), term:n("term"), ltv:n("ltv"), dti:n("dti"), ret:n("ret")/100, raise:n("raise")/100,
       eurm2:n("eurm2"), kind:$("kind").value, cushion:$("cushion").checked, m2:n("m2") };
@@ -314,10 +319,14 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
 
   function render(){
     const inp = read();
+    ["1","2"].forEach(k=>{ const n=$("n"+k); if(document.activeElement!==n){ const p=taxes(inp["g"+k]); n.value = Math.round(p.net/inp["pg"+k]); } });
+    $("n2").disabled = !inp.on2;
     $("g2").disabled = !inp.on2; $("a2").disabled = !inp.on2; $("pg2").disabled = !inp.on2;
     $("pctO").textContent = Math.round(inp.pct*100)+"%";
     $("yrsO").textContent = inp.yrs; $("yrsT").textContent = inp.yrs;
     $("m2O").textContent = inp.m2+" m²";
+    $("y1").textContent = "· "+E(inp.g1)+" brutos al año";
+    $("y2").textContent = inp.on2 ? "· "+E(inp.g2)+" brutos al año" : "";
     document.querySelectorAll(".chips button").forEach(b=>b.setAttribute("aria-pressed", String(+b.dataset.q===inp.eurm2)));
 
     const now = people(inp,0);
@@ -352,7 +361,7 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
     $("landPay").textContent = E(l.pay);
 
     drawChart(inp);
-    try{ const s={}; ids.forEach(id=>{const el=$(id); s[id]= el.type==="checkbox"?el.checked:el.value;}); localStorage.setItem("casaCalc2", JSON.stringify(s)); }catch(e){}
+    try{ const s={}; ids.forEach(id=>{const el=$(id); s[id]= el.type==="checkbox"?el.checked:el.value;}); localStorage.setItem("casaCalc3", JSON.stringify(s)); }catch(e){}
   }
 
   function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw))), m=raw/p; return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p; }
@@ -378,7 +387,17 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
     </svg>`;
   }
 
-  try{ const s=JSON.parse(localStorage.getItem("casaCalc2")||"null"); if(s) ids.forEach(id=>{ if(s[id]!==undefined){ const el=$(id); if(el.type==="checkbox") el.checked=s[id]; else el.value=s[id]; } }); }catch(e){}
+  function grossFromNet(netPaga, pagas){
+    const target = netPaga*pagas; let lo=0, hi=1e6;
+    for(let i=0;i<60;i++){ const m=(lo+hi)/2; if(taxes(m).net<target) lo=m; else hi=m; }
+    return hi/pagas;
+  }
+  ["1","2"].forEach(k=>$("n"+k).addEventListener("input",()=>{
+    const v=parseFloat($("n"+k).value); if(!(v>=0)) return;
+    $("g"+k).value = Math.round(grossFromNet(v, parseFloat($("pg"+k).value)||14)); render();
+  }));
+  ["1","2"].forEach(k=>$("n"+k).addEventListener("blur",render));
+  try{ const s=JSON.parse(localStorage.getItem("casaCalc3")||"null"); if(s) ids.forEach(id=>{ if(s[id]!==undefined){ const el=$(id); if(el.type==="checkbox") el.checked=s[id]; else el.value=s[id]; } }); }catch(e){}
   document.querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{ $("eurm2").value=b.dataset.q; render(); }));
   ids.forEach(id=>{ $(id).addEventListener("input",render); $(id).addEventListener("change",render); });
   render();
