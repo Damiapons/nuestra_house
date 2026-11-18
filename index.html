@@ -97,6 +97,12 @@ summary{cursor:pointer; font-size:13px; font-weight:700; color:var(--muted)}
 .pay{display:flex; align-items:baseline; gap:8px; padding:10px 12px; border-radius:12px; background:var(--bg)}
 .pay .n{font-family:var(--display); font-weight:800; font-size:22px; font-variant-numeric:tabular-nums}
 .pay .t{font-size:12.5px; color:var(--muted)}
+.duo{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px}
+.duo .k{font-size:12px; font-weight:700; color:var(--muted)}
+.duo .big{font-size:clamp(28px,6vw,38px)}
+.big.alt2{color:var(--accent2)}
+.ends{display:flex; justify-content:space-between; font-size:12.5px; font-weight:700; color:var(--muted)}
+#split{accent-color:var(--ink)}
 .chips{display:flex; flex-wrap:wrap; gap:6px}
 .chips button{font:inherit; font-size:13px; font-weight:700; border:1px solid var(--line); background:var(--bg); color:var(--muted); border-radius:99px; padding:6px 12px; cursor:pointer}
 .chips button[aria-pressed="true"]{background:var(--ink); color:var(--surface); border-color:var(--ink)}
@@ -190,19 +196,15 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
 
         <section class="card opt land" aria-labelledby="h-land">
           <span class="tag" id="h-land">Opción 2 · Terreno + casa</span>
+          <div class="duo">
+            <div><span class="k">Terreno</span><p class="big alt2" id="landT">–</p></div>
+            <div><span class="k">Casa</span><p class="big" id="landH">–</p><span class="k" id="landM2"></span></div>
+          </div>
           <div class="sl">
-            <div class="top"><label for="m2">Tamaño de la casa</label><output id="m2O" for="m2">100 m²</output></div>
-            <input id="m2" type="range" min="50" max="250" step="5" value="100">
+            <input id="split" type="range" min="0" max="100" step="1" value="70" aria-label="Reparto entre terreno y casa">
+            <div class="ends"><span>← Más terreno</span><span>Más casa →</span></div>
           </div>
-          <div class="chips" role="group" aria-label="Tipo de casa">
-            <button type="button" data-q="1200" aria-pressed="false">Prefabricada</button>
-            <button type="button" data-q="1500" aria-pressed="true">Construida</button>
-            <button type="button" data-q="2100" aria-pressed="false">Alta calidad</button>
-          </div>
-          <div>
-            <p class="big" id="landMax">–</p>
-            <p class="bigsub" id="landSub"></p>
-          </div>
+          <p class="bigsub" id="landSub"></p>
           <div class="bar" id="barLand" role="img" aria-label="Reparto del presupuesto terreno y casa"></div>
           <div class="legend" id="legLand"></div>
           <div class="pay"><span class="n" id="landPay">–</span><span class="t">de hipoteca al mes</span></div>
@@ -212,10 +214,10 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
       <section class="card" aria-labelledby="h-chart">
         <h2 id="h-chart">Cuanto más esperáis, más podéis gastar</h2>
         <div id="chart"></div>
-        <div class="legend"><span><i style="background:var(--accent)"></i>Casa que podéis comprar</span><span><i style="background:var(--accent2)"></i>Terreno que podéis pagar (con la casa ya incluida)</span></div>
+        <div class="legend"><span><i style="background:var(--accent)"></i>Casa que podéis comprar</span><span><i style="background:var(--accent2)"></i>Terreno + casa (con el reparto elegido)</span></div>
       </section>
 
-      <p class="foot">Estimación con IRPF y Seguridad Social de Cataluña 2026, ITP o IVA, notaría, licencia de obra, arquitecto, colchón de emergencia y una cuota de hipoteca de hasta el 30% del neto. En el terreno, primero se reserva el dinero para construir la casa entera y lo que sobra es lo que podéis pagar por el terreno. No tiene en cuenta hijos ni deducciones.</p>
+      <p class="foot">Estimación con IRPF y Seguridad Social de Cataluña 2026, ITP o IVA, notaría, licencia de obra, arquitecto, colchón de emergencia y una cuota de hipoteca de hasta el 30% del neto. En terreno + casa, el deslizador reparte el presupuesto y la casa siempre queda pagada. No tiene en cuenta hijos ni deducciones.</p>
     </div>
   </div>
 </div>
@@ -254,13 +256,13 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
   function loanFromPayment(pay, tin, years){ const i=tin/100/12, n=years*12; if(pay<=0) return 0; return i===0 ? pay*n : pay*(1-Math.pow(1+i,-n))/i; }
   function payFromLoan(L, tin, years){ const i=tin/100/12, n=years*12; if(L<=0) return 0; return i===0 ? L/n : L*i/(1-Math.pow(1+i,-n)); }
 
-  const ids = ["g1","a1","on2","g2","a2","pct","yrs","s0","pg1","pg2","tin","term","ltv","dti","ret","raise","eurm2","kind","cushion","m2"];
+  const ids = ["g1","a1","on2","g2","a2","pct","yrs","s0","pg1","pg2","tin","term","ltv","dti","ret","raise","eurm2","kind","cushion","split"];
   function read(){
     const n = id => parseFloat($(id).value)||0;
     return { g1:n("g1")*n("pg1"), a1:n("a1"), on2:$("on2").checked, g2:n("g2")*n("pg2"), a2:n("a2"),
       pct:n("pct")/100, yrs:Math.round(n("yrs")), s0:n("s0"), pg1:n("pg1"), pg2:n("pg2"),
       tin:n("tin"), term:n("term"), ltv:n("ltv"), dti:n("dti"), ret:n("ret")/100, raise:n("raise")/100,
-      eurm2:n("eurm2"), kind:$("kind").value, cushion:$("cushion").checked, m2:n("m2") };
+      eurm2:n("eurm2"), kind:$("kind").value, cushion:$("cushion").checked, split:n("split")/100 };
   }
   function people(inp, y){
     const f = Math.pow(1+inp.raise, y);
@@ -294,19 +296,19 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
     const extras = P*c+fixed;
     const buy = {P, loan, own:P+extras-loan, extras, pay:payFromLoan(loan,inp.tin,inp.term), limit:pSav<=pPay?"ahorro":"cuota"};
 
-    // Opción 2: terreno + casa (la casa se reserva primero)
-    const obra = inp.m2*inp.eurm2;
-    const houseExtras = obra*(0.10+0.10+0.04+0.03); // IVA, técnicos, licencia/ICIO, seguros y acometidas
-    const house = obra + houseExtras;
-    const finBase = obra*1.17;                     // valor de tasación aproximado de la casa (sin IVA)
-    const landC = 0.115;                            // ITP 10% + notaría/registro 1,5%
-    const T1 = (avail - house - fixed + inp.ltv*finBase)/(1+landC-inp.ltv);
-    const T2 = (avail - house - fixed + Lpay)/(1+landC);
-    const T = Math.min(T1,T2), Tp = Math.max(0,T);
-    const total = Tp*(1+landC) + house + fixed;
-    const loanL = Math.max(0, Math.min(total-avail, inp.ltv*(Tp+finBase), Lpay));
-    const shortfall = T<0 ? -T*(1+landC-(T1<=T2?inp.ltv:0)) : 0;
-    const land = {T, Tp, obra, house, extras:Tp*landC+houseExtras+fixed, total, loan:loanL, pay:payFromLoan(loanL,inp.tin,inp.term), shortfall};
+    // Opción 2: terreno + casa. split = parte del presupuesto que va a la casa
+    const landC = 0.115;           // ITP 10% + notaría/registro 1,5%
+    const houseC = 1.27;           // obra + IVA 10% + técnicos 10% + licencia/ICIO 4% + seguros/acometidas 3%
+    const f = inp.split;
+    const costPerB = (1-f)*(1+landC) + f*houseC;
+    const finPerB  = (1-f) + f*1.17;  // tasación aprox. (sin IVA)
+    const B1 = (avail-fixed)/(costPerB - inp.ltv*finPerB);
+    const B2 = (avail-fixed+Lpay)/costPerB;
+    const Bm = Math.max(0, Math.min(B1,B2));
+    const T = Bm*(1-f), obra = Bm*f;
+    const total = Bm*costPerB + fixed;
+    const loanL = Math.max(0, total-avail);
+    const land = {T, obra, m2: inp.eurm2>0 ? obra/inp.eurm2 : 0, B:Bm, extras:total-T-obra, total, loan:loanL, pay:payFromLoan(loanL,inp.tin,inp.term), limit:B1<=B2?"ahorro":"cuota"};
 
     return {S, cushion, avail, netM, ps, buy, land};
   }
@@ -324,10 +326,8 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
     $("g2").disabled = !inp.on2; $("a2").disabled = !inp.on2; $("pg2").disabled = !inp.on2;
     $("pctO").textContent = Math.round(inp.pct*100)+"%";
     $("yrsO").textContent = inp.yrs; $("yrsT").textContent = inp.yrs;
-    $("m2O").textContent = inp.m2+" m²";
     $("y1").textContent = "· "+E(inp.g1)+" brutos al año";
     $("y2").textContent = inp.on2 ? "· "+E(inp.g2)+" brutos al año" : "";
-    document.querySelectorAll(".chips button").forEach(b=>b.setAttribute("aria-pressed", String(+b.dataset.q===inp.eurm2)));
 
     const now = people(inp,0);
     const gross = now.reduce((a,p)=>a+p.gross,0), net = now.reduce((a,p)=>a+p.net,0), tax = gross-net;
@@ -354,20 +354,22 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
 
     // Terreno + casa
     const l = sc.land;
-    $("landMax").textContent = l.T>0 ? E(l.T) : "No llega";
-    $("landSub").innerHTML = l.T>0 ? "para el terreno, <b>y aún os queda para una casa de "+inp.m2+" m²</b> ("+E(l.house)+" con todo)."
-      : "Construir la casa ("+E(l.house)+" con todo) ya se come vuestro ahorro. Os faltan unos <b>"+E(l.shortfall)+"</b>: probad menos m², prefabricada o más años.";
-    bar("barLand","legLand",[["Terreno",l.Tp,"var(--accent2)"],["Casa",l.obra,"var(--accent)"],["Impuestos, arquitecto y licencias",l.extras,"var(--tax)"]]);
+    $("landT").textContent = E(l.T);
+    $("landH").textContent = E(l.obra);
+    $("landM2").textContent = l.m2>=1 ? "≈ "+Math.round(l.m2)+" m² a "+E(inp.eurm2)+"/m²" : "";
+    $("landSub").innerHTML = l.B<=0 ? "Aún no llega: ahorrad más años o un % mayor." :
+      "Con impuestos, arquitecto y licencias, <b>"+E(l.total)+"</b> en total."+(l.limit==="ahorro"?" Os frena el ahorro.":" Os frena la cuota.");
+    bar("barLand","legLand",[["Terreno",l.T,"var(--accent2)"],["Casa",l.obra,"var(--accent)"],["Impuestos, arquitecto y licencias",l.extras,"var(--tax)"]]);
     $("landPay").textContent = E(l.pay);
 
     drawChart(inp);
-    try{ const s={}; ids.forEach(id=>{const el=$(id); s[id]= el.type==="checkbox"?el.checked:el.value;}); localStorage.setItem("casaCalc3", JSON.stringify(s)); }catch(e){}
+    try{ const s={}; ids.forEach(id=>{const el=$(id); s[id]= el.type==="checkbox"?el.checked:el.value;}); localStorage.setItem("casaCalc4", JSON.stringify(s)); }catch(e){}
   }
 
   function niceStep(raw){ const p=Math.pow(10,Math.floor(Math.log10(raw))), m=raw/p; return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p; }
   function drawChart(inp){
     const N=20, W=640, H=230, L=50, R=16, Tm=14, B=26;
-    const pts=[]; for(let y=0;y<=N;y++){ const s=scenario(inp,y); pts.push({p:s.buy.P, t:Math.max(0,s.land.T)}); }
+    const pts=[]; for(let y=0;y<=N;y++){ const s=scenario(inp,y); pts.push({p:s.buy.P, t:s.land.B}); }
     const max = Math.max(1, ...pts.map(d=>Math.max(d.p,d.t)));
     const step = niceStep(max/4), top = Math.ceil(max/step)*step;
     const x=i=>L+(W-L-R)*i/N, yv=v=>Tm+(H-Tm-B)*(1-v/top);
@@ -397,8 +399,7 @@ svg text{font-family:var(--body); fill:var(--muted); font-size:11px}
     $("g"+k).value = Math.round(grossFromNet(v, parseFloat($("pg"+k).value)||14)); render();
   }));
   ["1","2"].forEach(k=>$("n"+k).addEventListener("blur",render));
-  try{ const s=JSON.parse(localStorage.getItem("casaCalc3")||"null"); if(s) ids.forEach(id=>{ if(s[id]!==undefined){ const el=$(id); if(el.type==="checkbox") el.checked=s[id]; else el.value=s[id]; } }); }catch(e){}
-  document.querySelectorAll(".chips button").forEach(b=>b.addEventListener("click",()=>{ $("eurm2").value=b.dataset.q; render(); }));
+  try{ const s=JSON.parse(localStorage.getItem("casaCalc4")||"null"); if(s) ids.forEach(id=>{ if(s[id]!==undefined){ const el=$(id); if(el.type==="checkbox") el.checked=s[id]; else el.value=s[id]; } }); }catch(e){}
   ids.forEach(id=>{ $(id).addEventListener("input",render); $(id).addEventListener("change",render); });
   render();
 })();
